@@ -165,43 +165,43 @@ exports.getSignature = async (req, res, next) => {
 
 }
 
-exports.signup = async (req, res) => {
+// exports.signup = async (req, res) => {
    
-    try {
+//     try {
         
-        const users = await new user(req.body);
+//         const users = await new user(req.body);
    
-        const finduser = await user.find({ key: req.body.key });
+//         const finduser = await user.find({ key: req.body.key });
     
-        if (finduser.length >= 1) {
+//         if (finduser.length >= 1) {
 
-            return res.status(500).json({
-                status: false,
-                message: "user already exists please use other email address !"
-            })
+//             return res.status(500).json({
+//                 status: false,
+//                 message: "user already exists please use other email address !"
+//             })
 
-        }
+//         }
 
-        const newuser = await users.save();
-        if(newuser._id){
-            res.json({
-                status: true,
-                message: "Signup Successfully !"
-            });
-        }else{
-            res.status(400).json({
-                message: "All fields are required !"
-            });
-        }
+//         const newuser = await users.save();
+//         if(newuser._id){
+//             res.json({
+//                 status: true,
+//                 message: "Signup Successfully !"
+//             });
+//         }else{
+//             res.status(400).json({
+//                 message: "All fields are required !"
+//             });
+//         }
 
-    } catch (error) {
-        res.status(400).json({
-            message: "Something went wrong."
-        });
-    }
+//     } catch (error) {
+//         res.status(400).json({
+//             message: "Something went wrong."
+//         });
+//     }
 
 
-}
+// }
 
 exports.cryptoPay = async (req , res) => {
 
