@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 // app.use('/', express.static(path.join(__dirname, 'public/frontend')));
 app.use('/user',route);
 app.use(express.json());
-var server = app.listen(process.env.PORT || 3000, function () {
+var server = app.listen(process.env.PORT || 5000, function () {
     var port = server.address().port;
     console.log("Express is working on port " + port);
 });
