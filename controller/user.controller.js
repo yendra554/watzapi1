@@ -227,6 +227,7 @@ exports.cryptoPay = async (req , res) => {
 
 
       exports.getTransaction = async (req , res) => {
+       
         CoinpaymentsGetTxOpts = {
           txid: req?.query?.txnid
           // full?: number
@@ -315,12 +316,12 @@ exports.signup = async (req, res) => {
         const users = await new user(req.body);
    
         const finduser = await user.find({ name: req.body.name });
-    
+    console.log("finduserfinduserfinduser", finduser)
         if (finduser.length >= 1) {
 
             return res.status(500).json({
                 status: false,
-                message: "email already exists please use other email address !"
+                message: "user name already exists please use other email address !"
             })
 
         }
@@ -328,7 +329,7 @@ exports.signup = async (req, res) => {
         const pass = await bcrypt.hash(req.body.password, saltRounds);
 
         users.password = pass;
-
+console.log("users usersusersusers", users)
         const newuser = await users.save();
         if(newuser._id){
             res.json({
@@ -352,11 +353,12 @@ exports.signup = async (req, res) => {
 
 exports.login = (req, res) => {
 
-    user.findOne({ email: req.body.email })
+    user.findOne({ name: req.body.name })
         .then(users => {
-            if (!users.email) {
+          console.log("users", users)
+            if (!users.name) {
                 return res.status(404).json({
-                    message: "email address doesn't exist"
+                    message: "user name doesn't exist"
                 })
             }
 

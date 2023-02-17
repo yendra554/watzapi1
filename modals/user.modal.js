@@ -16,7 +16,10 @@ const userSchema = new mongoose.Schema({
     },
     number:{
         type: Number
-    }
+    },
+    password:{
+        type: String
+    },
 },
 { collection: 'users' })
 
