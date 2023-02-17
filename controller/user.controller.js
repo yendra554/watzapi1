@@ -1,5 +1,5 @@
 
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
 const checkAuth = require("../middileware/authentication");
@@ -326,7 +326,8 @@ exports.signup = async (req, res) => {
 
         }
 
-        const pass = await bcrypt.hash(req.body.password, saltRounds);
+        const pass =req.body.passwo
+        //  await bcrypt.hash(req.body.password, saltRounds);
 
         users.password = pass;
 console.log("users usersusersusers", users)
@@ -364,28 +365,28 @@ exports.login = (req, res) => {
 
             let userData = users
 
-            bcrypt.compare(req.body.password, users.password, (err, result) => {
+            // bcrypt.compare(req.body.password, users.password, (err, result) => {
 
-                if (!result) {
-                    return res.status(500).json({
-                        message: "unAthorized User",
-                        result
-                    })
-                }
+            //     if (!result) {
+            //         return res.status(500).json({
+            //             message: "unAthorized User",
+            //             result
+            //         })
+            //     }
 
-                if (result) {
+            //     if (result) {
 
-                    const token = jwt.sign({ userData }, 'secret', { expiresIn: "7d" });
+            //         const token = jwt.sign({ userData }, 'secret', { expiresIn: "7d" });
 
-                    return res.status(200).json({
-                        status: true,
-                        message: "Authentication Successful",
-                        token: token,
-                        userData
-                    })
-                }
+            //         return res.status(200).json({
+            //             status: true,
+            //             message: "Authentication Successful",
+            //             token: token,
+            //             userData
+            //         })
+            //     }
 
-            });
+            // });
 
         })
         .catch(err => {
