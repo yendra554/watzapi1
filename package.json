@@ -11,7 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",
-     "body-parser": "^1.20.0",
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.0",
     "coinpayments": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
@@ -19,6 +20,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.10",
     "mongoose-timestamp": "^0.6.0",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "txt-file-to-json": "^3.0.6"
   }
 }

@@ -1,5 +1,4 @@
-
-// const bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
 const checkAuth = require("../middileware/authentication");
@@ -10,9 +9,12 @@ const crypto = require("crypto");
 const accessKey = 'V52C2BXXC3KWR0MGHK2C';
 const secretKey = 'rxerxO2ZTMP8VITcpiCQdwdu1fk6aps0l5tB4JAOuBw1H0MM8wHlYGSbusVKmuKa';
 const log = false;
-
+const fs = require('fs');
 const Coinpayments = require('coinpayments');
-
+const { exit } = require('process');
+const { getEnvironmentData } = require('worker_threads');
+const { json } = require('body-parser');
+const userService = require('./user.service');
 
  CoinpaymentsCredentials = {
   key: '78d787154436bb6481af1c1d65bddf81c3e135f561212c5cba74cf210868dd25',
@@ -74,23 +76,17 @@ exports.getSignature = async (req, res, next) => {
     function sign() {
       let salt = generateRandomString(6);
               let timestamp = Math.round(new Date().getTime() / 1000);
-      console.log("fdsfdsfsd",salt)
-      console.log("fdsfdsfsd",timestamp)
-      console.log("fdsfdsfsd",accessKey)
-      // console.log("fdsfdsfsd",urlPath)
-      // console.log("fdsfdsfsd",method)
-      console.log("fdsfdsfsd",req.query.urlpath)
-      console.log("fdsfdsfsd",req.query.httpmethod)
+      
+      
         try {
           let toSign =
           req.query.httpmethod?.toUpperCase() + req.query.urlpath + salt + timestamp + accessKey + secretKey;
-          log && console.log(`toSign: ${toSign}`);
+         
       
           let hash = crypto.createHmac("sha256", secretKey);
           hash.update(toSign);
           const signature = Buffer.from(hash.digest("hex")).toString("base64");
-          log && console.log(`signature: ${signature}`);
-          console.log(`signature: ${signature}`);
+          
           res.status(200).json({
             status: true,
             banners:signature,
@@ -165,43 +161,47 @@ exports.getSignature = async (req, res, next) => {
 
 }
 
-// exports.signup = async (req, res) => {
+exports.signup = async (req, res) => {
    
-//     try {
+    try {
         
-//         const users = await new user(req.body);
+        const users = await new users();
+        console.log("users", users)
+        const user = await User.findById(id)
+;
+        const finduser = await user.find({ key: req.body.key });
    
-//         const finduser = await user.find({ key: req.body.key });
-    
-//         if (finduser.length >= 1) {
+        if (finduser.length >= 1) {
 
-//             return res.status(500).json({
-//                 status: false,
-//                 message: "user already exists please use other email address !"
-//             })
+            return res.status(500).json({
+                status: false,
+                message: "user already exists please use other email address !"
+            })
 
-//         }
+        }
 
-//         const newuser = await users.save();
-//         if(newuser._id){
-//             res.json({
-//                 status: true,
-//                 message: "Signup Successfully !"
-//             });
-//         }else{
-//             res.status(400).json({
-//                 message: "All fields are required !"
-//             });
-//         }
+        const newuser = await users.save();
+        if(newuser._id){
+            res.json({
+                status: true,
+                message: "Signup Successfully !"
+            });
+        }else{
+            res.status(400).json({
+                message: "All fields are required !"
+            });
+        }
 
-//     } catch (error) {
-//         res.status(400).json({
-//             message: "Something went wrong."
-//         });
-//     }
+    } catch (error) {
+        res.status(400).json({
+            message: "Something went wrong."
+        });
+    }
 
 
-// }
+}
+
+
 
 exports.cryptoPay = async (req , res) => {
 
@@ -226,8 +226,7 @@ exports.cryptoPay = async (req , res) => {
 
 
 
-      exports.getTransaction = async (req , res) => {
-       
+ exports.getTransaction = async (req , res) => {
         CoinpaymentsGetTxOpts = {
           txid: req?.query?.txnid
           // full?: number
@@ -314,23 +313,23 @@ exports.signup = async (req, res) => {
     try {
         
         const users = await new user(req.body);
-   
+     
         const finduser = await user.find({ name: req.body.name });
-    console.log("finduserfinduserfinduser", finduser)
-        if (finduser.length >= 1) {
+    
+
+        if (finduser.length > 1) {
 
             return res.status(500).json({
                 status: false,
-                message: "user name already exists please use other email address !"
+                message: "email already exists please use other email address !"
             })
 
         }
 
-        const pass =req.body.passwo
-        //  await bcrypt.hash(req.body.password, saltRounds);
+         const pass = await bcrypt.hash(req.body.password, saltRounds);
 
-        users.password = pass;
-console.log("users usersusersusers", users)
+         users.password = pass;
+
         const newuser = await users.save();
         if(newuser._id){
             res.json({
@@ -338,12 +337,13 @@ console.log("users usersusersusers", users)
                 message: "Signup Successfully !"
             });
         }else{
-            res.status(400).json({
+            res.status(401).json({
                 message: "All fields are required !"
             });
         }
 
     } catch (error) {
+      
         res.status(400).json({
             message: "Something went wrong."
         });
@@ -356,41 +356,40 @@ exports.login = (req, res) => {
 
     user.findOne({ name: req.body.name })
         .then(users => {
-          console.log("users", users)
             if (!users.name) {
                 return res.status(404).json({
-                    message: "user name doesn't exist"
+                    message: "email address doesn't exist"
                 })
             }
 
             let userData = users
 
-            // bcrypt.compare(req.body.password, users.password, (err, result) => {
+            bcrypt.compare(req.body.password, users.password, (err, result) => {
 
-            //     if (!result) {
-            //         return res.status(500).json({
-            //             message: "unAthorized User",
-            //             result
-            //         })
-            //     }
+                if (!result) {
+                    return res.status(500).json({
+                        message: "unAthorized User",
+                        result
+                    })
+                }
 
-            //     if (result) {
+                if (result) {
 
-            //         const token = jwt.sign({ userData }, 'secret', { expiresIn: "7d" });
+                    const token = jwt.sign({ userData }, 'secret', { expiresIn: "7d" });
 
-            //         return res.status(200).json({
-            //             status: true,
-            //             message: "Authentication Successful",
-            //             token: token,
-            //             userData
-            //         })
-            //     }
+                    return res.status(200).json({
+                        status: true,
+                        message: "Authentication Successful",
+                        token: token,
+                        userData
+                    })
+                }
 
-            // });
+            });
 
         })
         .catch(err => {
-            console.log(err);
+            console.log(res.status);
             res.status(500).json({
                 error: err
             });
@@ -398,48 +397,49 @@ exports.login = (req, res) => {
 
 }
 
+// exports.getAllList = async (req, res, next) => {
+//   const fs = require('fs');
 
-// exports.login = (req, res) => {
+//   try {
+//     const data = fs.readFileSync('log.txt', 'utf8');
+//     console.log(data);
+   
+//   } catch (err) {
+//     console.error(err);
+//   } 
 
-//     user.findOne({ email: req.body.email })
-//         .then(users => {
-//             if (!users.email) {
-//                 return res.status(404).json({
-//                     message: "email address doesn't exist"
-//                 })
-//             }
 
-//             let userData = users
 
-//             bcrypt.compare(req.body.password, users.password, (err, result) => {
-
-//                 if (!result) {
-//                     return res.status(500).json({
-//                         message: "unAthorized User",
-//                         result
-//                     })
-//                 }
-
-//                 if (result) {
-
-//                     const token = jwt.sign({ userData }, 'secret', { expiresIn: "7d" });
-
-//                     return res.status(200).json({
-//                         status: true,
-//                         message: "Authentication Successful",
-//                         token: token,
-//                         userData
-//                     })
-//                 }
-
-//             });
-
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             res.status(500).json({
-//                 error: err
-//             });
-//         });
 
 // }
+
+
+
+exports.getAllList = async (req, res, next) => {
+  userService.getAllList()
+  .then(users => 
+    
+    res.json(users),
+    sendWhatsUPmsg("https://watzapi.in/send-message?api_key=FsF12rfxbC2UiLZO1OZ7pSAIVStCad&sender=917428322239&number=919354869926&message=welcome to marketWiks")
+  
+  )
+  .catch(err => next(err));
+
+}
+
+
+
+
+function sendWhatsUPmsg(url){
+
+  axios.post(url)
+        .then(function (response) {
+        // console.log("https://watzapi.in/send-message?api_key=FsF12rfxbC2UiLZO1OZ7pSAIVStCad&sender=917428322239&number=919354869926&message=welcome to marketWiks")
+          // res.status(200).json(response.data)
+        })
+        .catch(function (error) {
+          // handle error
+          // console.log(error);
+          res.status(500).json(error)
+        })
+    }
